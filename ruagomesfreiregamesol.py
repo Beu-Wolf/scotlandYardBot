@@ -13,6 +13,7 @@ class SearchProblem:
 
   def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf]):
     res = []
+    currexp = 0
     if len(init) > 1:
       print("Too many agents to handle... Grrr")
       return res
@@ -42,6 +43,7 @@ class SearchProblem:
     
     while len(queue) > 0:
       curr = queue.pop(0)
+      
       # print("U[",  curr, "] = ", self.model[curr])
       for i in self.model[curr]:
         transport, vertex = i
@@ -67,6 +69,13 @@ class SearchProblem:
             curr = status[curr]['parent']
           res.insert(0, [[], [curr]])
           return res
+
+      if (status[curr]['depth'] + 1) == limitdepth:
+        return res
+      
+      currexp += 1
+      if currexp == limitexp:
+        return res
     
     return res
 
