@@ -11,12 +11,13 @@ class SearchProblem:
     self.model = model
     self.auxheur = auxheur
 
-  def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf]):
+  def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyOrder = False):
     res = []
     currexp = 0
     if len(init) > 1:
       print("Too many agents to handle... Grrr")
       return res
+    
     
     # One agent only. FIXME
     # BFS

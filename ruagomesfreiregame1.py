@@ -142,6 +142,7 @@ else:
 
 print("\n(4 val) Exercise 5 - Three agents, Limits, Any-Order")
 
+nn = SP.search(I,limitexp = 3000, limitdepth = 10, tickets = [5,20,2], anyorder = True)
 tendtotal = time.process_time()
 print("Total time %.1fms"%((tendtotal-tinittotal)*1000))
 
