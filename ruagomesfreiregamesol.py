@@ -36,7 +36,6 @@ import itertools
 #           * heuristic
   
 class SearchProblem:
-
   def __init__(self, goal, model, auxheur = []):
     self.goal = goal
     self.model = model
@@ -144,7 +143,7 @@ class SearchProblem:
 
       return res
 
-  def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
+  def search(self, init, limitexp=2000, limitdepth=10, tickets=[math.inf,math.inf,math.inf], anyorder=False):
       root = tuple(init)
       searchTree = {}
       searchTree[root] = {
@@ -155,7 +154,7 @@ class SearchProblem:
       }
 
       # heap is a heap of tuples (heuristic, (position)) so we can compare combinations by their heuristic
-      # position is a tuple so we can use the state combination as a dict key (see Advanced#4)
+      # position is a tuple so we can use it as a dict key (see Advanced#4)
       heap = []
       heapq.heappush(heap, (self.score(searchTree[root]['stepCount'], init, self.goal), root))
       # print(heap)
