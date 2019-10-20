@@ -145,6 +145,9 @@ class SearchProblem:
       return res
 
   def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
+    
+      numExpansion = 0
+      
       root = tuple(init)
       searchTree = {}
       searchTree[root] = {
@@ -167,6 +170,10 @@ class SearchProblem:
           # print("===================Popped", curr)
           if curr == tuple(self.goal):
               return self.traceback(searchTree)
+          
+          if numExpansion > limitexp and searchTree[curr]['stepCount'] > limitdepth:
+              continue 
+          
 
           # Generate possible moves
           # TODO: generate list of all combinations in one line (see Advanced#3)
@@ -179,6 +186,8 @@ class SearchProblem:
               # TODO: filter bad moves (already visited, previous, no tickets for this trip, ...)
               # tuple(move) for move in self.model[pos] if <vertex is not visited, not previous...>
               possibleMoves.append(tuple(tuple(move) for move in self.model[pos]))
+
+          numExpansion += 1
           
           # print("List of moves per agent:", possibleMoves)
           possibleMoves = list(itertools.product(*possibleMoves))
