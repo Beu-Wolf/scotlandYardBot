@@ -143,7 +143,10 @@ class SearchProblem:
 
       return res
 
-  def search(self, init, limitexp=2000, limitdepth=10, tickets=[math.inf,math.inf,math.inf], anyorder=False):
+  def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
+    
+      numExpansion = 0
+      
       root = tuple(init)
       searchTree = {}
       searchTree[root] = {
@@ -166,6 +169,10 @@ class SearchProblem:
           # print("===================Popped", curr)
           if curr == tuple(self.goal):
               return self.traceback(searchTree)
+          
+          if numExpansion > limitexp and searchTree[curr]['stepCount'] > limitdepth:
+              continue 
+          
 
           # Generate possible moves
           # TODO: generate list of all combinations in one line (see Advanced#3)
@@ -178,6 +185,8 @@ class SearchProblem:
               # TODO: filter bad moves (already visited, previous, no tickets for this trip, ...)
               # tuple(move) for move in self.model[pos] if <vertex is not visited, not previous...>
               possibleMoves.append(tuple(tuple(move) for move in self.model[pos]))
+
+          numExpansion += 1
           
           # print("List of moves per agent:", possibleMoves)
           possibleMoves = list(itertools.product(*possibleMoves))
@@ -196,10 +205,10 @@ class SearchProblem:
               destVertices = tuple(action[1] for action in move)
               typeTransport = [action[0] for action in move]
               if destVertices in searchTree:
-                  continue;
+                  continue
               
               if len(set(destVertices)) != len(move): # check rule#1
-                  continue;
+                  continue
 
               newTickets = copy.deepcopy(searchTree[curr]['tickets'])
               for t in typeTransport:
@@ -214,6 +223,9 @@ class SearchProblem:
                   'tickets': newTickets,
                   'stepCount': searchTree[curr]['stepCount'] + 1
               }
+
+              
+
               heapq.heappush(heap, (self.score(searchTree[destVertices]['stepCount'], destVertices, self.goal), destVertices))
               validMoves.append(move)
 
@@ -243,14 +255,7 @@ class SearchProblem:
           #     WARNING: we calculate costs for goal 61 twice!!!
           while(len(q) > 0): # BFS to find minimum depth
               curr = q.popleft()
-              # TODO: remove  ===================
-              # printing all adjacent vertices
-              _a = []
-              for adj in self.model[curr]:
-                  _a.append(adj[1])
-              
-              # print(curr, ":", _a)
-              #==================================
+             
 
               # discuss: check if visited by checking if key exists
               #     or keep inQueue? __ vs O(1)
