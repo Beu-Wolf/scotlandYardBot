@@ -73,8 +73,6 @@ if validatepath(nn,I,U):
 else:
         print("invalid path")
 
-
-
 print("\n(4 val) Exercise 2 - One agent, Limits")
 print("Init [30] Goal [56]")
 SP = SearchProblem(goal = [56], model = U, auxheur=coords)
@@ -107,6 +105,7 @@ if validatepath(nn,I,U):
                 plotpath(nn,coords)
 else:
         print("invalid path")
+
 
 print("\n(6 val) Exercise 3 - Three agents, No limits (test 2)")
 print("Init [30,40,109] Goal [61,60,71]")
