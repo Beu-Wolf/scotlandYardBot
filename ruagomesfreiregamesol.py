@@ -226,7 +226,7 @@ class SearchProblem:
       res = deque()
       curr = tuple(self.goal)
       while curr != False:
-          res.appendleft((searchTree[curr]['typeTransport'], curr))
+          res.appendleft((searchTree[curr]['typeTransport'], list(curr)))
           curr = searchTree[curr]['parent']
       return res
       # return list(res)

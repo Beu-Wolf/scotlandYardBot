@@ -70,7 +70,6 @@ def validatepath(oP,oI,U,tickets=[25,25,25]):
 
 tinittotal = time.process_time()
 
-
 print("\n(2 val) Exercise 1 - One agent, No limits")
 print("Init [30] Goal [56]")
 SP = SearchProblem(goal = [56], model = U, auxheur=coords)
