@@ -2,7 +2,7 @@ import math
 import copy
 from collections import deque
 import heapq
-import itertools
+from itertools import product, permutations
 
 
 # Advanced
@@ -25,15 +25,6 @@ import itertools
 #
 # Questions:
 #   Use global variables so we don't have to pass the object to functions?
-#   Does heuristic funcion have to receive the goal? It's the same for every problem
-#
-# TODOS:
-#   Change heuristic function name (score seems like a good thing, but we are trying to minimize it
-#       Suggestions:
-#           * f (use bibliograpy notation)
-#           * h
-#           * estimatedCost
-#           * heuristic
   
 class SearchProblem:
   def __init__(self, goal, model, auxheur = []):
@@ -46,15 +37,15 @@ class SearchProblem:
 
   def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
       if anyorder:
-          possibleGoals = list(itertools.permutations(self.goal))
+          possibleGoals = list(permutations(self.goal))
           bestScore = math.inf
           for g in possibleGoals:
-              s = self.score(0, init, g)
+              s = self.f(0, init, g)
               if s < bestScore:
                   bestScore = s
                   self.goal = g
  
-
+      print("Init", init, "Goal", self.goal, "Tickets", tickets)
       root = tuple(init)
       searchTree = {}
       searchTree[root] = {
@@ -67,56 +58,41 @@ class SearchProblem:
       # heap is a heap of tuples (heuristic, (position)) so we can compare combinations by their heuristic
       # position is a tuple so we can use it as a dict key (see Advanced#4)
       heap = []
-      heapq.heappush(heap, (self.score(searchTree[root]['stepCount'], init, self.goal), root))
-      # print(heap)
-      # print(searchTree)
+      heapq.heappush(heap, (self.f(searchTree[root]['stepCount'], init, self.goal), root))
 
       numExpansion = 0
       while(len(heap) > 0):
           numExpansion += 1
 
           curr = heapq.heappop(heap)[1]
-          # print("===================Popped", curr)
           if curr == tuple(self.goal):
               return self.traceback(searchTree)
           
           if numExpansion > limitexp or searchTree[curr]['stepCount'] > limitdepth:
               continue 
-          
 
           # Generate possible moves
-          possibleMoves = [tuple(tuple(move) for move in self.model[pos] if searchTree[curr]['tickets'][move[0]] > 0) for pos in curr]
+          possibleMoves = list(product(*[tuple(tuple(move) for move in self.model[pos] if searchTree[curr]['tickets'][move[0]] > 0) for pos in curr]))
 
-          
-          # print("List of moves per agent:", possibleMoves)
-          possibleMoves = list(itertools.product(*possibleMoves))
-          # print("List of all combinations:", possibleMoves)   
-
-          # Add valid moves
-          # Move restrictions
+          # Add valid moves (restrictions below)
           #     1: 2 agents can't be in the same place at the same time
           #     2: Limited tickets
-          #     3: (?) Do not add existing states. If it already exists, 
-          #         it's the closest one TODO: check this
-          #     4: If move equals to goal, add to heap and break. It will be removed in the next iteration
-          #         We should check if popped move from heap equals goal when popping...
-          validMoves = []
+          #     3: Do not add existing states - If it already exists, 
+          #         it's the closest one
           for move in possibleMoves:
               destVertices = tuple(action[1] for action in move)
               typeTransport = [action[0] for action in move]
-              if destVertices in searchTree:
-                  continue
-              
-              if len(set(destVertices)) != len(move): # check rule#1
+              #  restriction 3                 restriction 1
+              if destVertices in searchTree or len(set(destVertices)) != len(move):
                   continue
 
-              newTickets = copy.deepcopy(searchTree[curr]['tickets'])
+              # newTickets = copy.deepcopy(searchTree[curr]['tickets'])
+              newTickets = [*searchTree[curr]['tickets']] # This makes so much difference!!
               for t in typeTransport:
                   newTickets[t] -= 1
               if len([a for a in newTickets if a < 0]) > 0:
                   continue
                   
-              
               searchTree[destVertices] = {
                   'parent': curr,
                   'typeTransport': typeTransport,
@@ -124,41 +100,27 @@ class SearchProblem:
                   'stepCount': searchTree[curr]['stepCount'] + 1
               }
 
-              
+              heapq.heappush(heap, (self.f(searchTree[destVertices]['stepCount'], destVertices, self.goal), destVertices))
 
-              heapq.heappush(heap, (self.score(searchTree[destVertices]['stepCount'], destVertices, self.goal), destVertices))
-              validMoves.append(move)
-
-          # print("Valid moves:", validMoves)   
-
+      print("No path found")
       return
 
   def traceback(self, searchTree):
       res = deque()
+      appendleft = res.appendleft
       curr = tuple(self.goal)
       while curr != False:
-          res.appendleft((searchTree[curr]['typeTransport'], list(curr)))
+          appendleft((searchTree[curr]['typeTransport'], list(curr)))
           curr = searchTree[curr]['parent']
       return res
-      # return list(res)
       
 
   def calculateNumTrips(self, goalList):
       for goal in goalList:
           q = deque([goal])
-          # inQueue = [False] * len(self.model)
-          # inQueue[goal] = True
-          # print(len(inQueue))
           self.mindepth[(goal, goal)] = 0
-          # TODO: if this value was previously set,
-          # we don't have to calculate again for every vertex
-          #     WARNING: we calculate costs for goal 61 twice!!!
           while(len(q) > 0): # BFS to find minimum depth
               curr = q.popleft()
-             
-
-              # discuss: check if visited by checking if key exists
-              #     or keep inQueue? __ vs O(1)
               for adj in self.model[curr]:
                   vert = adj[1]
                   if (vert, goal) in self.mindepth: # already visited
@@ -170,14 +132,9 @@ class SearchProblem:
   # Our heuristic function
   # best case scenario: it will get to the goal
   # in the greatest minimum steps value
-  def score(self, cost, vertices, goals):
-      return max([cost + self.mindepth[(vertices[i], goals[i])] for i in range(len(vertices))])
-
-  # SAME AS: TODO: delete this comment
-  #     ret = 0
-  #     for i in range(len(cost)):
-  #         ret = max([ret, auxcosts[i] + self.mindepth[(vertices[i], goals[i])]])
-  #     return ret
+  def f(self, cost, vertices, goals):
+      mindepth = self.mindepth
+      return max([cost + mindepth[(vertices[i], goals[i])] for i in range(len(vertices))])
 
 # =============================================== END OF CLASS ============================================
 
