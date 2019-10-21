@@ -150,7 +150,7 @@ def ex4():
 
 def ex5():
     print("\n(4 val) Exercise 5 - Three agents, Limits, Any-Order")
-    print("Init [30,40,109] Goal [61,60,71]")
+    print("Init [30,40,109] Goal [63, 61, 70]")
     SP = SearchProblem(goal = [63,61,70], model = U, auxheur=coords)
     tinit = time.process_time()
     I = [30,40,109]
