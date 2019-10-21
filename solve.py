@@ -71,7 +71,7 @@ class SearchProblem:
           if curr == tuple(self.goal):
               return self.traceback(searchTree)
           
-          if numExpansion > limitexp and searchTree[curr]['stepCount'] > limitdepth:
+          if numExpansion > limitexp or searchTree[curr]['stepCount'] > limitdepth:
               continue 
           
 
