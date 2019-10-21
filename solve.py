@@ -45,8 +45,17 @@ class SearchProblem:
     self.calculateNumTrips(self.goal)
 
   def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
-    
-      numExpansion = 0
+      if anyorder:
+          possibleGoals = list(itertools.permutations(self.goal))
+          bestScore = math.inf
+          for g in possibleGoals:
+              s = self.score(0, init, g)
+              if s < bestScore:
+                  bestScore = s
+                  self.goal = g
+          
+  
+              
       
       root = tuple(init)
       searchTree = {}
@@ -64,6 +73,7 @@ class SearchProblem:
       # print(heap)
       # print(searchTree)
 
+      numExpansion = 0
       while(len(heap) > 0):
           #TODO: check limit depth and expansions
           curr = heapq.heappop(heap)[1]
