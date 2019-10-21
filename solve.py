@@ -53,10 +53,8 @@ class SearchProblem:
               if s < bestScore:
                   bestScore = s
                   self.goal = g
-          
-  
-              
-      
+ 
+
       root = tuple(init)
       searchTree = {}
       searchTree[root] = {
@@ -75,7 +73,8 @@ class SearchProblem:
 
       numExpansion = 0
       while(len(heap) > 0):
-          #TODO: check limit depth and expansions
+          numExpansion += 1
+
           curr = heapq.heappop(heap)[1]
           # print("===================Popped", curr)
           if curr == tuple(self.goal):
@@ -86,18 +85,8 @@ class SearchProblem:
           
 
           # Generate possible moves
-          # TODO: generate list of all combinations in one line (see Advanced#3)
-          possibleMoves = []
-          for pos in curr:
-              # ---------- lines below only for debug
-              # agentMoves = tuple(tuple(move) for move in self.model[pos]) # list of possible moves
-              # print("Agent " + str(curr.index(pos)) + " position " + str(pos) + " : " + str(agentMoves))
-              # ---------- lines above only for debug
-              # TODO: filter bad moves (already visited, previous, no tickets for this trip, ...)
-              # tuple(move) for move in self.model[pos] if <vertex is not visited, not previous...>
-              possibleMoves.append(tuple(tuple(move) for move in self.model[pos]))
+          possibleMoves = [tuple(tuple(move) for move in self.model[pos] if searchTree[curr]['tickets'][move[0]] > 0) for pos in curr]
 
-          numExpansion += 1
           
           # print("List of moves per agent:", possibleMoves)
           possibleMoves = list(itertools.product(*possibleMoves))
