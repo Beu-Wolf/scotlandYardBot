@@ -79,8 +79,10 @@ class SearchProblem:
           #     3: Do not add existing states - If it already exists, 
           #         it's the closest one
           for move in possibleMoves:
-              destVertices = tuple([action[1] for action in move])
-              typeTransport = [action[0] for action in move]
+              # destVertices = tuple([action[1] for action in move])
+              # typeTransport = [action[0] for action in move]
+              typeTransport, destVertices = zip(*move) # also makes a big difference in time
+
               #  restriction 3                 restriction 1
               if destVertices in searchTree or len(set(destVertices)) != len(move):
                   continue
@@ -132,8 +134,7 @@ class SearchProblem:
   # best case scenario: it will get to the goal
   # in the greatest minimum steps value
   def f(self, cost, vertices, goals):
-      mindepth = self.mindepth
-      return max([cost + mindepth[(vertices[i], goals[i])] for i in range(len(vertices))])
+      return max([cost + self.mindepth[(vertices[i], goals[i])] for i in range(len(vertices))])
 
 # =============================================== END OF CLASS ============================================
 
