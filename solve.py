@@ -81,17 +81,17 @@ class SearchProblem:
           for move in possibleMoves:
               # destVertices = tuple([action[1] for action in move])
               # typeTransport = [action[0] for action in move]
-              typeTransport, destVertices = zip(*move) # also makes a big difference in time
+              typeTransport, destVertices = zip(*move) # Makes a big difference in time
 
               #  restriction 3                 restriction 1
               if destVertices in searchTree or len(set(destVertices)) != len(move):
                   continue
 
               # newTickets = copy.deepcopy(searchTree[curr]['tickets'])
-              newTickets = [*searchTree[curr]['tickets']] # This makes so much difference!!
+              newTickets = [*searchTree[curr]['tickets']] # Makes a big difference in time
               for t in typeTransport:
                   newTickets[t] -= 1
-              if len([a for a in newTickets if a < 0]) > 0:
+              if [a for a in newTickets if a < 0]:
                   continue
                   
               searchTree[destVertices] = {
