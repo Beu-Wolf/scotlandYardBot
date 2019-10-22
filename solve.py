@@ -45,7 +45,6 @@ class SearchProblem:
                   bestScore = s
                   self.goal = g
  
-      print("Init", init, "Goal", self.goal, "Tickets", tickets)
       root = tuple(init)
       searchTree = {}
       searchTree[root] = {
@@ -80,7 +79,7 @@ class SearchProblem:
           #     3: Do not add existing states - If it already exists, 
           #         it's the closest one
           for move in possibleMoves:
-              destVertices = tuple(action[1] for action in move)
+              destVertices = tuple([action[1] for action in move])
               typeTransport = [action[0] for action in move]
               #  restriction 3                 restriction 1
               if destVertices in searchTree or len(set(destVertices)) != len(move):

@@ -12,6 +12,7 @@ with open("mapasgraph2.pickle", "rb") as fp:   #Unpickling
 U = AA[1]
 
 def plotpath(P,coords):   
+        return
         img = plt.imread('maps.png')
         plt.imshow(img)
         colors = ['r.-','g+-','b^-']
@@ -66,7 +67,6 @@ def validatepath(oP,oI,U,tickets=[25,25,25]):
                         return False
         # print(oP)
         return True
-
 
 def ex1():
     print("\n(2 val) Exercise 1 - One agent, No limits")
