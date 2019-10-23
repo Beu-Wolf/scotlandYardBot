@@ -87,9 +87,9 @@ def ex1():
 def ex2():
     print("\n(4 val) Exercise 2 - One agent, Limits")
     print("Init [30] Goal [56]")
-    SP = SearchProblem(goal = [56], model = U, auxheur=coords)
+    SP = SearchProblem(goal = [30], model = U, auxheur=coords)
     tinit = time.process_time()
-    I = [30]
+    I = [56]
     nn = SP.search(I,limitexp = 2000, tickets = [5,5,2])
     tend = time.process_time()
     print("%.1fms"%((tend-tinit)*1000))

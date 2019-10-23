@@ -45,7 +45,7 @@ class SearchProblem:
                   bestScore = s
                   self.goal = g
  
-      root = tuple(init)
+      root = (tuple(init), False)
       searchTree = {}
       searchTree[root] = {
           'parent': False,
@@ -64,14 +64,14 @@ class SearchProblem:
           numExpansion += 1
 
           curr = heapq.heappop(heap)[1]
-          if curr == tuple(self.goal):
-              return self.traceback(searchTree)
+          if curr[0] == tuple(self.goal):
+              return self.traceback(searchTree, curr)
           
           if numExpansion > limitexp or searchTree[curr]['stepCount'] > limitdepth:
               continue 
 
           # Generate possible moves
-          possibleMoves = list(product(*[tuple(tuple(move) for move in self.model[pos] if searchTree[curr]['tickets'][move[0]] > 0) for pos in curr]))
+          possibleMoves = list(product(*[tuple(tuple(move) for move in self.model[pos] if searchTree[curr]['tickets'][move[0]] > 0) for pos in curr[0]]))
 
           # Add valid moves (restrictions below)
           #     1: 2 agents can't be in the same place at the same time
@@ -82,10 +82,8 @@ class SearchProblem:
               # destVertices = tuple([action[1] for action in move])
               # typeTransport = [action[0] for action in move]
               typeTransport, destVertices = zip(*move) # Makes a big difference in time
-
-              #  restriction 3                 restriction 1
-              if destVertices in searchTree or len(set(destVertices)) != len(move):
-                  continue
+              
+              movePossibility = (tuple(destVertices), curr[0])
 
               # newTickets = copy.deepcopy(searchTree[curr]['tickets'])
               newTickets = [*searchTree[curr]['tickets']] # Makes a big difference in time
@@ -93,26 +91,33 @@ class SearchProblem:
                   newTickets[t] -= 1
               if [a for a in newTickets if a < 0]:
                   continue
-                  
-              searchTree[destVertices] = {
+                
+              #  restriction 3                 restriction 1
+              #  destVertices in searchTree
+
+              if len(set(movePossibility[0])) != len(move):
+                  continue
+              
+              
+              searchTree[movePossibility] = {
                   'parent': curr,
                   'typeTransport': typeTransport,
                   'tickets': newTickets,
                   'stepCount': searchTree[curr]['stepCount'] + 1
               }
 
-              heapq.heappush(heap, (self.f(searchTree[destVertices]['stepCount'], destVertices, self.goal), destVertices))
+              heapq.heappush(heap, (self.f(searchTree[movePossibility]['stepCount'], movePossibility[0], self.goal), movePossibility))
 
       print("No path found")
       return
 
-  def traceback(self, searchTree):
+  def traceback(self, searchTree, first):
       res = deque()
       appendleft = res.appendleft
-      curr = tuple(self.goal)
+      curr = first
       while curr != False:
-          appendleft((searchTree[curr]['typeTransport'], list(curr)))
-          curr = searchTree[curr]['parent']
+          appendleft((searchTree[curr]['typeTransport'], list(curr[0])))
+          curr = (searchTree[curr]['parent'])
       return res
       
 
@@ -138,18 +143,4 @@ class SearchProblem:
 
 # =============================================== END OF CLASS ============================================
 
-# TODO: Remove <3
-def printStatus(status):
-  for i in status.keys():
-    print(i, status[i])
 
-
-def calcDist(auxheur, point, objective):
-  x = auxheur[objective][0] - auxheur[point][0]
-  y = auxheur[objective][1] - auxheur[point][1]
-
-  return math.sqrt(x**2 + y**2)
-
-def printDict(d):
-    for k in d:
-        print(k, d[k])
