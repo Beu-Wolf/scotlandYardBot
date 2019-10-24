@@ -95,7 +95,7 @@ class SearchProblem:
               #  restriction 3                 restriction 1
               #  destVertices in searchTree
 
-              if len(set(movePossibility[0])) != len(move):
+              if movePossibility in searchTree or len(set(movePossibility[0])) != len(move):
                   continue
               
               
