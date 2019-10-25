@@ -26,6 +26,21 @@ from itertools import product, permutations
 # Questions:
 #   Use global variables so we don't have to pass the object to functions?
   
+class Node:
+    def __init__(self, f, node):
+        self.f = f
+        self.node = node
+
+    def __lt__(self, other):
+        return self.f < other.f or self.node['g'] < other.node['g']
+
+    def __repr__(self):
+        res = "\n{ score: " + str(self.f)
+        for k in self.node:
+            res+= "\n" + str(k) + ": " + str(self.node[k])
+
+        return res + "}"
+
 class SearchProblem:
   def __init__(self, goal, model, auxheur = []):
     self.goal = goal
@@ -35,7 +50,7 @@ class SearchProblem:
     self.mindepth = {}
     self.calculateNumTrips(self.goal)
 
-  def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
+  def search2(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
       if anyorder:
           possibleGoals = list(permutations(self.goal))
           bestScore = math.inf
@@ -106,6 +121,82 @@ class SearchProblem:
       print("No path found")
       return
 
+  def search(self, init, limitexp = 2000, limitdepth = 10, tickets = [math.inf,math.inf,math.inf], anyorder = False):
+      if anyorder:
+          possibleGoals = list(permutations(self.goal))
+          bestScore = math.inf
+          for g in possibleGoals:
+              s = self.f(0, init, g)
+              if s < bestScore:
+                  bestScore = s
+                  self.goal = g
+
+      root = {
+        'vertices': init,
+        'parent': False,
+        'typeTransport': [],
+        'tickets': tickets,
+        'g': 0
+      }
+
+      heap = []
+      heapq.heappush(heap, Node(self.f(root['g'], root['vertices'], self.goal), root))
+
+      numExpansions = 0
+      while(len(heap) > 0):
+          numExpansions+=1
+          popped= heapq.heappop(heap)
+          # print(" ->Popped", popped)
+          curr = popped.node
+          if curr['vertices'] == tuple(self.goal):
+              return self.traceback2(curr)
+          
+          if numExpansions > limitexp or curr['g'] > limitdepth:
+              print("Limit exceeded")
+              continue
+
+    
+          possibleMoves = list(product(*[tuple(tuple(move) for move in self.model[pos] if curr['tickets'][move[0]] > 0) for pos in curr['vertices']]))
+          # print(possibleMoves)
+
+          for move in possibleMoves:
+              typeTransport, destVertices = zip(*move)
+
+              newTickets = [*curr['tickets']]
+              for t in typeTransport:
+                  newTickets[t]-=1
+              if [a for a in newTickets if a < 0]:
+                  # print("No tickets!")
+                  continue
+              
+              if len(set(destVertices)) != len(move):
+                  # print("Invalid position")
+                  continue
+
+              node = {
+                'vertices': destVertices,
+                'parent': curr,
+                'typeTransport': typeTransport,
+                'tickets': newTickets,
+                'g': curr['g'] + 1
+              }
+
+              # print(Node(self.f(node['g'], destVertices, self.goal), node))
+              heapq.heappush(heap, Node(self.f(node['g'], destVertices, self.goal), node))
+          # print("=======================================")
+          # print("New heap:", heap)
+          # print("=======================================") 
+
+  def traceback2(self, goalNode):
+      res = deque()
+      appendleft = res.appendleft
+      curr = goalNode
+      while curr:
+          appendleft((curr['typeTransport'], list(curr['vertices'])))
+          curr = curr['parent']
+
+      return res
+
   def traceback(self, searchTree):
       res = deque()
       appendleft = res.appendleft
@@ -114,7 +205,6 @@ class SearchProblem:
           appendleft((searchTree[curr]['typeTransport'], list(curr)))
           curr = searchTree[curr]['parent']
       return res
-      
 
   def calculateNumTrips(self, goalList):
       for goal in goalList:
@@ -134,7 +224,7 @@ class SearchProblem:
   # best case scenario: it will get to the goal
   # in the greatest minimum steps value
   def f(self, cost, vertices, goals):
-      return max([cost + self.mindepth[(vertices[i], goals[i])] for i in range(len(vertices))])
+      return max([cost + 2*self.mindepth[(vertices[i], goals[i])] for i in range(len(vertices))])
 
 # =============================================== END OF CLASS ============================================
 
