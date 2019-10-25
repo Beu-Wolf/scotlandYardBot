@@ -1,3 +1,5 @@
+# Grupo 007 - Afonso Gonçalves 89399, Daniel Seara 89427
+
 import math
 import copy
 from collections import deque
